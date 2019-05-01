@@ -1,17 +1,32 @@
 import cv2
 import numpy as np
 import dlib
+import time
 
+# Properties는 아래 링크에서 확인
+# https://docs.opencv.org/4.1.0/d4/d15/group__videoio__flags__base.html#gaeb8dd9c89c10a5c63c139bf7c4f5704d
 cap = cv2.VideoCapture(0)
+fps = cap.get(5)
 
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
 
+prevTimestamp = 0
+currentTimestamp = 0
+currentRectangle = np.ndarray(shape=(2, 2), dtype=int)
+currentLandmarks = np.ndarray(shape=(68, 2), dtype=int)
+
 renderRectangle = np.ndarray(shape=(2, 2), dtype=int)
 renderLandmarks = np.ndarray(shape=(68, 2), dtype=int)
 
+# interpolation
+flagNeedToUpdate = False
+
 while True:
     _, frame = cap.read()
+
+    # 초기화
+    flagNeedToUpdate = False
 
     # frame 크기
     screenWidth = int(round(cap.get(4)))
@@ -34,19 +49,30 @@ while True:
     gray = cv2.cvtColor(targetFrame, cv2.COLOR_BGR2GRAY)
     faces = detector(gray)
     for face in faces:
-        renderRectangle[0][0] = face.left()
-        renderRectangle[0][1] = face.top()
-        renderRectangle[1][0] = face.right()
-        renderRectangle[1][1] = face.bottom()
+        currentRectangle[0][0] = face.left()
+        currentRectangle[0][1] = face.top()
+        currentRectangle[1][0] = face.right()
+        currentRectangle[1][1] = face.bottom()
         
         landmarks = predictor(gray, face)
         
+        flagNeedToUpdate = True
+
         for n in range(0, 68):
-            renderLandmarks[n][0] = landmarks.part(n).x
-            renderLandmarks[n][1] = landmarks.part(n).y
+            currentLandmarks[n][0] = landmarks.part(n).x
+            currentLandmarks[n][1] = landmarks.part(n).y
         
+    # Interpolation
+    currentTimestamp = time.time()
+    interTimestamp = (currentTimestamp - prevTimestamp) * 1000 / fps
+    renderRectangle = renderRectangle + (currentRectangle - renderRectangle) / interTimestamp
+    renderLandmarks = renderLandmarks + (currentLandmarks - renderLandmarks) / interTimestamp
+    prevTimestamp = currentTimestamp
 
     # Rendering
+    renderRectangle = renderRectangle.astype(int)
+    renderLandmarks = renderLandmarks.astype(int)
+
     x1 = renderRectangle[0][0]
     y1 = renderRectangle[0][1]
     x2 = renderRectangle[1][0]

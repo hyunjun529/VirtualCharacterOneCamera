@@ -13,6 +13,7 @@
 - [ ] config 만들기
 - [ ] **Scale값에 따른 3D 공간으로 변환**
 - [ ] 모니터 위를 볼 때 와 아래를 볼 때 구분하기
+- [ ] OpenFace로 dlib, Face Landmark
 
 ![featurePoint](resource/facemarks_points.png)
 
