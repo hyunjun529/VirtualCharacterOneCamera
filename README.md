@@ -4,11 +4,13 @@
 
 ## ToDo
 ### Python, Face Landmark
-- [ ] OpenCV, dlib, dlib-model로 얼굴 따오기
-- [ ] 좌우반전
-- [ ] 입력 소스를 조금 더 크게
-- [ ] WebCam image 투사 지우기
+- [x] OpenCV, dlib, dlib-model로 얼굴 따오기
+- [x] 좌우반전
+- [x] 입력 소스를 조금 더 크게
+- [x] WebCam image 투사 지우기
+- [ ] **끊어진 프레임 사이에서 Interpolation**
 - [ ] Debug Parameter 출력하기
+- [ ] config 만들기
 - [ ] **Scale값에 따른 3D 공간으로 변환**
 - [ ] 모니터 위를 볼 때 와 아래를 볼 때 구분하기
 
