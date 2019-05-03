@@ -3,35 +3,60 @@ import numpy as np
 import dlib
 import time
 
+
+# Transform
+# for position z, using Rectangle
+faceScale = 1
+# for position xy, using Rectangle
+facePosition = np.ndarray(shape=(3), dtype=float)
+
+# faceRotation = solvePNP
+# https://www.learnopencv.com/head-pose-estimation-using-opencv-and-dlib/
+# 6점, 양 눈 끝, 양 입 끝, 코, 턱, 
+# 캐릭터 얼굴 비율 : 2/3
+
+centerPosition = np.ndarray(shape=(2), dtype=float)
+
+faceTransform = np.ndarray(shape=(4, 4), dtype=float)
+
+
 # Properties는 아래 링크에서 확인
 # https://docs.opencv.org/4.1.0/d4/d15/group__videoio__flags__base.html#gaeb8dd9c89c10a5c63c139bf7c4f5704d
 cap = cv2.VideoCapture(0)
 fps = cap.get(5)
+screenWidth = int(round(cap.get(4)))
+screenHeight = int(round(cap.get(3)))
+
+centerPosition[0] = screenWidth / 2.0
+centerPosition[1] = screenHeight / 2.0
+
 
 # https://github.com/davisking/dlib-models
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
 
+
+# for rendering
 prevTimestamp = 0
 currentTimestamp = 0
+
 currentRectangle = np.ndarray(shape=(2, 2), dtype=int)
 currentLandmarks = np.ndarray(shape=(68, 2), dtype=int)
 
 renderRectangle = np.ndarray(shape=(2, 2), dtype=int)
 renderLandmarks = np.ndarray(shape=(68, 2), dtype=int)
 
+
 # interpolation
 flagNeedToUpdate = False
 
+
+# Loop
 while True:
     _, frame = cap.read()
 
     # 초기화
     flagNeedToUpdate = False
-
-    # frame 크기
-    screenWidth = int(round(cap.get(4)))
-    screenHeight = int(round(cap.get(3)))
 
     # 좌우 반전
     flipedFrame = frame.copy()
@@ -65,9 +90,12 @@ while True:
         
     # Interpolation
     currentTimestamp = time.time()
-    interTimestamp = (currentTimestamp - prevTimestamp) * 1000 / fps
-    renderRectangle = renderRectangle + (currentRectangle - renderRectangle) / interTimestamp
-    renderLandmarks = renderLandmarks + (currentLandmarks - renderLandmarks) / interTimestamp
+    interTimestamp1 = (currentTimestamp - prevTimestamp) * 1000 / fps
+    interTimestamp2 = (currentTimestamp - prevTimestamp) * 1000 / (fps / 3)
+    if np.linalg.norm(currentRectangle - renderRectangle) > 2:
+        renderRectangle = renderRectangle + (currentRectangle - renderRectangle) / interTimestamp2
+    if np.linalg.norm(currentLandmarks - renderLandmarks) > 1:
+        renderLandmarks = renderLandmarks + (currentLandmarks - renderLandmarks) / interTimestamp1
     prevTimestamp = currentTimestamp
 
     # Rendering
@@ -85,8 +113,15 @@ while True:
         y = renderLandmarks[n][1]
         cv2.circle(renderFrame, (x, y), 2, (255, 0, 0), -1)
 
+    # 얼굴 사긱형의 크기와 중심값 구하기
+    faceRectangleSize = renderRectangle[1] - renderRectangle[0]
+    faceRectangleCenter = (renderRectangle[0] + faceRectangleSize / 2).astype(int)
+    cv2.circle(renderFrame, (faceRectangleCenter[0], faceRectangleCenter[1]), 2, (0, 0, 255), -1)
+
+    # 프레임 그리기
     cv2.imshow("Frame", renderFrame)
 
+    # ESC로 종료
     key = cv2.waitKey(1)
     if key == 27:
         break

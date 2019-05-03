@@ -11,7 +11,7 @@
 - [X] **끊어진 프레임 사이에서 Interpolation**
 - [X] Debug Parameter 출력하기
 - [X] config 만들기
-- [ ] **Scale값에 따른 3D 공간으로 변환**
+- [ ] **2D 입력값을 3D 공간으로 변환**
 - [ ] ~~OpenFace로 dlib, Face Landmark를 대체하기~~
 - [ ] ~~모니터 위를 볼 때 와 아래를 볼 때 구분하기~~
 
@@ -47,3 +47,4 @@ Face Landmark > VRoid Character
 - [OpenFace](https://github.com/TadasBaltrusaitis/OpenFace)
 - [ValveSoftware/openvr](https://github.com/ValveSoftware/openvr)
 - [pyopenvr](https://github.com/cmbruns/pyopenvr)
+- https://www.learnopencv.com/head-pose-estimation-using-opencv-and-dlib/
