@@ -4,13 +4,6 @@ import dlib
 import time
 
 
-# zmq 테스트
-import zmq
-context = zmq.Context()
-socket = context.socket(zmq.PUB)
-socket.bind("tcp://*:12345")
-
-
 # Transform
 # for position z, using Rectangle
 faceScale = 1
@@ -124,17 +117,6 @@ while True:
     faceRectangleSize = renderRectangle[1] - renderRectangle[0]
     faceRectangleCenter = (renderRectangle[0] + faceRectangleSize / 2).astype(int)
     cv2.circle(renderFrame, (faceRectangleCenter[0], faceRectangleCenter[1]), 2, (0, 0, 255), -1)
-
-    print(faceRectangleSize[0])
-    print(faceRectangleCenter)
-
-    # zmq 테스트
-    faceX = ((centerPosition[0] - faceRectangleCenter[0]) / 100) * 0.5
-    faceY = ((centerPosition[1] - faceRectangleCenter[1]) / 100) * 0.5
-    faceZ = ((faceRectangleSize[0] - 200) / 100) * 1
-    message = str(faceX) + " " + str(faceY)  + " " + str(faceZ)
-    socket.send_string(message)
-
 
     # 프레임 그리기
     cv2.imshow("Frame", renderFrame)
