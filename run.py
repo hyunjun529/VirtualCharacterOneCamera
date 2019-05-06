@@ -125,16 +125,27 @@ while True:
     faceRectangleCenter = (renderRectangle[0] + faceRectangleSize / 2).astype(int)
     cv2.circle(renderFrame, (faceRectangleCenter[0], faceRectangleCenter[1]), 2, (0, 0, 255), -1)
 
-    print(faceRectangleSize[0])
-    print(faceRectangleCenter)
-
-    # zmq 테스트
+    # zmq
+    # 얼굴의 위치
     faceX = ((centerPosition[0] - faceRectangleCenter[0]) / 100) * 0.5
     faceY = ((centerPosition[1] - faceRectangleCenter[1]) / 100) * 0.5
     faceZ = ((faceRectangleSize[0] - 200) / 100) * 1
-    message = str(faceX) + " " + str(faceY)  + " " + str(faceZ)
-    socket.send_string(message)
 
+    # 입 모양의 크기
+    mouthA = (((currentLandmarks[66][1] - currentLandmarks[62][1]) * 8) / faceRectangleSize[0])
+    if mouthA < 0.4:
+        mouthA = 0.0
+    if mouthA > 1.0:
+        mouthA = 1.0
+
+    mouthI = ((((currentLandmarks[54][0] - currentLandmarks[48][0]) * 5) / faceRectangleSize[0]) - 1.6) * 2
+    if mouthI < 0.4:
+        mouthI = 0.0
+    if mouthI > 1.0:
+        mouthI = 1.0
+
+    message = str(faceX) + " " + str(faceY)  + " " + str(faceZ) + " "  + str(mouthA) + " "  + str(mouthI)
+    socket.send_string(message)
 
     # 프레임 그리기
     cv2.imshow("Frame", renderFrame)
